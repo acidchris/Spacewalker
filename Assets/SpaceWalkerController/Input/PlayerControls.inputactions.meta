@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: ceb91e47eaf5fd642b380992e4385784
+guid: 27ba20c90f9f0fb4881345c295d43f5d
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -11,4 +11,4 @@ ScriptedImporter:
   generateWrapperCode: 1
   wrapperCodePath: 
   wrapperClassName: 
-  wrapperCodeNamespace: 
+  wrapperCodeNamespace: Game.Input
