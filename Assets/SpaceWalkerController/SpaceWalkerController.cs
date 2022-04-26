@@ -1,4 +1,5 @@
 
+using Game.Stamina;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -28,6 +29,7 @@ namespace Game.Input
         public float maxJumpHeight = 2f;
         public float JumpTimeout = 0.50f;
         public float FallTimeout = 0.15f;
+        public float FlyVelocity = 3f;
 
         private float _verticalVelocity;
         public bool isJumpPressed = false;
@@ -38,6 +40,8 @@ namespace Game.Input
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
 
+        [SerializeField]
+        private StaminaBar _staminaBar = null;
 
         private void Awake()
         {
@@ -123,7 +127,10 @@ namespace Game.Input
             //move
             if (_movement != Vector2.zero)
             {
-                _rigidbody.AddForce(targetDirection, ForceMode.Impulse);
+                if (!isGrounded)
+                    _rigidbody.AddForce(targetDirection.normalized * (_movementSpeed * 0.8f) * Time.deltaTime, ForceMode.VelocityChange);
+                else
+                    _rigidbody.AddForce(targetDirection, ForceMode.Impulse);
             }
             else
             {
@@ -137,6 +144,8 @@ namespace Game.Input
 
         private void JumpAndGravity()
         {
+            hasFuel = _staminaBar.HasStamina;
+
             if (isGrounded)
             {
                 if (_verticalVelocity < 0.0f)
@@ -144,13 +153,15 @@ namespace Game.Input
                     _verticalVelocity = -2f;
                 }
 
-                hasFuel = true; //regenerate while grounded
+                _staminaBar.UpdateStamina();
 
                 isFlying = false;
-                if (isJumpPressed)
+                if (isJumpPressed && _staminaBar.HasStaminaToInitialLaunch)
                 {
-                    _verticalVelocity = 5f;//Mathf.Sqrt(maxJumpHeight * -2f * Gravity);
+                    _verticalVelocity = FlyVelocity;//Mathf.Sqrt(maxJumpHeight * -2f * Gravity);
                     isFlying = true;
+
+                    _staminaBar.TrySpendStamina(40f);
                 }
 
                 // apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
@@ -164,7 +175,9 @@ namespace Game.Input
                 if (isJumpPressed && hasFuel)
                 {
                     isFlying = true;
-                    _verticalVelocity = 5f;
+                    _verticalVelocity = FlyVelocity;
+
+                    _staminaBar.TrySpendStamina(30f);
                 }
                 else
                 {
